@@ -39,6 +39,16 @@
                         <i class="fas fa-book"></i> Μαθήματα
                     </a>
                 </li>
+                {% if current_user.is_authenticated and current_user.role in ['teacher', 'parent'] %}
+                <li class="nav-item">
+                    <a class="nav-link position-relative" href="{{ url_for('messages.index') }}" style="color: var(--neon-blue); transition: all 0.3s;">
+                        <i class="fas fa-envelope"></i> Μηνύματα
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" 
+                              style="background-color: var(--neon-pink);" id="unread-count">
+                        </span>
+                    </a>
+                </li>
+                {% endif %}
             </ul>
             <div class="navbar-nav">
                 {% if current_user.is_authenticated %}
@@ -71,3 +81,29 @@
         </div>
     </div>
 </nav>
+
+{% if current_user.is_authenticated and current_user.role in ['teacher', 'parent'] %}
+<script>
+async function updateUnreadCount() {
+    try {
+        const response = await fetch('/messages/unread-count');
+        const data = await response.json();
+        const unreadCount = document.getElementById('unread-count');
+        if (data.count > 0) {
+            unreadCount.textContent = data.count;
+            unreadCount.style.display = 'block';
+        } else {
+            unreadCount.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error fetching unread count:', error);
+    }
+}
+
+// Update count on page load and every 30 seconds
+document.addEventListener('DOMContentLoaded', function() {
+    updateUnreadCount();
+    setInterval(updateUnreadCount, 30000);
+});
+</script>
+{% endif %}

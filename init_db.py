@@ -1,5 +1,5 @@
 from app import app, db
-from models import User, Course
+from models import User, Course  # Import all models to ensure they're registered
 from werkzeug.security import generate_password_hash
 
 def init_db():
@@ -12,14 +12,12 @@ def init_db():
             password_hash=generate_password_hash('test123')
         )
         db.session.add(test_parent)
-        db.session.commit()  # Commit to get the parent ID
         
         # Create test student linked to parent
         test_student = User(
             username='test_student',
             email='student@example.com',
             role='student',
-            parent_id=test_parent.id,
             password_hash=generate_password_hash('test123')
         )
         db.session.add(test_student)
@@ -33,11 +31,17 @@ def init_db():
         )
         db.session.add(test_teacher)
         
+        # Commit to get the IDs
+        db.session.commit()
+        
+        # Now update the student with parent_id
+        test_student.parent_id = test_parent.id
+        
         # Create test course
         test_course = Course(
             title='Αρχαία Ελληνικά',
             description='Εισαγωγή στη γλώσσα και τον πολιτισμό της αρχαίας Ελλάδας',
-            teacher_id=3  # This will be the teacher's ID
+            teacher_id=test_teacher.id  # Use the actual teacher ID
         )
         db.session.add(test_course)
         

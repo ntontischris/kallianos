@@ -72,5 +72,6 @@ class Message(db.Model):
     recipient_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     subject = db.Column(db.String(100))
     body = db.Column(db.Text, nullable=False)
+    category = db.Column(db.String(20), default='general')  # homework, behavior, general
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     read = db.Column(db.Boolean, default=False)

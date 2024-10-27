@@ -22,11 +22,13 @@ def create_app():
     from courses import courses_bp
     from teacher import teacher_bp
     from parent import parent_bp
+    from messages import messages_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(courses_bp)
     app.register_blueprint(teacher_bp)
     app.register_blueprint(parent_bp)
+    app.register_blueprint(messages_bp)
     
     @app.route('/')
     def index():

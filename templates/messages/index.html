@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Messages List -->
+        <div class="col-md-4">
+            <div class="card loading-fade-in mb-4">
+                <div class="card-body">
+                    <h2 class="card-title mb-4" style="color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);">
+                        <i class="fas fa-inbox"></i> Εισερχόμενα
+                    </h2>
+                    <div class="list-group messages-list">
+                        {% for message in messages_received %}
+                        <div class="list-group-item message-item {% if not message.read %}unread{% endif %}" 
+                             data-message-id="{{ message.id }}"
+                             style="background: rgba(255, 255, 255, 0.05); margin-bottom: 10px; border-radius: 10px; cursor: pointer;">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h6 class="mb-1" style="color: var(--neon-pink);">{{ message.subject }}</h6>
+                                <span class="badge" 
+                                      style="background-color: {% if message.category == 'homework' %}var(--neon-blue)
+                                                            {% elif message.category == 'behavior' %}var(--neon-pink)
+                                                            {% else %}var(--neon-purple){% endif %}">
+                                    {{ message.category }}
+                                </span>
+                            </div>
+                            <p class="mb-1 text-truncate">{{ message.body }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">{{ message.sender.username }}</small>
+                                <small class="text-muted">{{ message.timestamp.strftime('%d/%m/%Y %H:%M') }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card loading-fade-in">
+                <div class="card-body">
+                    <h2 class="card-title mb-4" style="color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue);">
+                        <i class="fas fa-paper-plane"></i> Απεσταλμένα
+                    </h2>
+                    <div class="list-group">
+                        {% for message in messages_sent %}
+                        <div class="list-group-item" style="background: rgba(255, 255, 255, 0.05); margin-bottom: 10px; border-radius: 10px;">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h6 class="mb-1" style="color: var(--neon-pink);">{{ message.subject }}</h6>
+                                <span class="badge" 
+                                      style="background-color: {% if message.category == 'homework' %}var(--neon-blue)
+                                                            {% elif message.category == 'behavior' %}var(--neon-pink)
+                                                            {% else %}var(--neon-purple){% endif %}">
+                                    {{ message.category }}
+                                </span>
+                            </div>
+                            <p class="mb-1 text-truncate">{{ message.body }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Προς: {{ message.recipient.username }}</small>
+                                <small class="text-muted">{{ message.timestamp.strftime('%d/%m/%Y %H:%M') }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Message View and Compose -->
+        <div class="col-md-8">
+            <!-- New Message Form -->
+            <div class="card loading-fade-in mb-4">
+                <div class="card-body">
+                    <h2 class="card-title mb-4" style="color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink);">
+                        <i class="fas fa-edit"></i> Νέο Μήνυμα
+                    </h2>
+                    <form method="POST" action="{{ url_for('messages.send_message') }}">
+                        <div class="mb-3">
+                            <label for="recipient_id" class="form-label">Παραλήπτης</label>
+                            <select class="form-select" id="recipient_id" name="recipient_id" required>
+                                <option value="">Επιλέξτε παραλήπτη...</option>
+                                {% for recipient in recipients %}
+                                <option value="{{ recipient.id }}">{{ recipient.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Κατηγορία</label>
+                            <select class="form-select" id="category" name="category" required>
+                                <option value="general">Γενικό</option>
+                                <option value="homework">Εργασία</option>
+                                <option value="behavior">Συμπεριφορά</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Θέμα</label>
+                            <input type="text" class="form-control" id="subject" name="subject" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="body" class="form-label">Μήνυμα</label>
+                            <textarea class="form-control" id="body" name="body" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-neon">
+                            <i class="fas fa-paper-plane"></i> Αποστολή
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Message View -->
+            <div class="card loading-fade-in message-view" style="display: none;">
+                <div class="card-body">
+                    <h2 class="message-subject mb-4" style="color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);"></h2>
+                    <div class="message-meta mb-4">
+                        <span class="message-from"></span> |
+                        <span class="message-time"></span> |
+                        <span class="message-category"></span>
+                    </div>
+                    <div class="message-body"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.message-item {
+    transition: all 0.3s ease;
+}
+
+.message-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px var(--neon-purple);
+}
+
+.message-item.unread {
+    border-left: 4px solid var(--neon-blue);
+}
+
+.form-control, .form-select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.form-control:focus, .form-select:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--neon-purple);
+    box-shadow: 0 0 10px var(--neon-purple);
+    color: #fff;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Message click handling
+    const messageItems = document.querySelectorAll('.message-item');
+    const messageView = document.querySelector('.message-view');
+    
+    messageItems.forEach(item => {
+        item.addEventListener('click', async function() {
+            const messageId = this.dataset.messageId;
+            
+            // Mark as read
+            if (this.classList.contains('unread')) {
+                try {
+                    const response = await fetch(`/messages/${messageId}/read`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (response.ok) {
+                        this.classList.remove('unread');
+                        updateUnreadCount();
+                    }
+                } catch (error) {
+                    console.error('Error marking message as read:', error);
+                }
+            }
+            
+            // Display message content
+            const subject = this.querySelector('h6').textContent;
+            const body = this.querySelector('p').textContent;
+            const from = this.querySelector('small').textContent;
+            const time = this.querySelectorAll('small')[1].textContent;
+            const category = this.querySelector('.badge').textContent;
+            
+            messageView.querySelector('.message-subject').textContent = subject;
+            messageView.querySelector('.message-from').textContent = `From: ${from}`;
+            messageView.querySelector('.message-time').textContent = time;
+            messageView.querySelector('.message-category').textContent = category;
+            messageView.querySelector('.message-body').textContent = body;
+            
+            messageView.style.display = 'block';
+        });
+    });
+    
+    // Check for new messages periodically
+    async function updateUnreadCount() {
+        try {
+            const response = await fetch('/messages/unread-count');
+            const data = await response.json();
+            // Update UI with unread count (implement as needed)
+        } catch (error) {
+            console.error('Error fetching unread count:', error);
+        }
+    }
+    
+    // Check every 30 seconds
+    setInterval(updateUnreadCount, 30000);
+});
+</script>
+{% endblock %}
