@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Back Button -->
+    <a href="{{ url_for('courses.index') }}" class="btn btn-neon mb-4">
+        <i class="fas fa-arrow-left"></i> Πίσω στα Μαθήματα
+    </a>
+
+    <!-- Course Title and Description -->
+    <div class="card loading-fade-in mb-4">
+        <div class="card-body">
+            <h1 class="card-title mb-3" style="color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);">
+                {{ course.title }}
+            </h1>
+            <p class="card-text text-muted">{{ course.description }}</p>
+        </div>
+    </div>
+
+    <!-- Teacher Information -->
+    {% if teacher %}
+    <div class="card loading-fade-in mb-4">
+        <div class="card-body">
+            <h3 class="card-title mb-3" style="color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink);">
+                <i class="fas fa-chalkboard-teacher"></i> Καθηγητής
+            </h3>
+            <p class="card-text">
+                <span style="color: var(--neon-blue);">{{ teacher.username }}</span>
+            </p>
+            <p class="card-text text-muted">
+                <i class="fas fa-envelope"></i> {{ teacher.email }}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Course Materials Section -->
+    <div class="card loading-fade-in mb-4">
+        <div class="card-body">
+            <h3 class="card-title mb-3" style="color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue);">
+                <i class="fas fa-book"></i> Εκπαιδευτικό Υλικό
+            </h3>
+            <p class="text-muted">Το εκπαιδευτικό υλικό θα είναι σύντομα διαθέσιμο.</p>
+        </div>
+    </div>
+
+    <!-- Course Schedule Section -->
+    <div class="card loading-fade-in">
+        <div class="card-body">
+            <h3 class="card-title mb-3" style="color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);">
+                <i class="fas fa-calendar-alt"></i> Πρόγραμμα Μαθημάτων
+            </h3>
+            <p class="text-muted">Το πρόγραμμα μαθημάτων θα ανακοινωθεί σύντομα.</p>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px var(--neon-purple);
+}
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    h3 {
+        font-size: 1.4rem;
+    }
+}
+</style>
+{% endblock %}
