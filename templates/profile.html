@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Profile Information Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card loading-fade-in">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <div class="position-relative d-inline-block">
+                            {% if current_user.profile_picture %}
+                                <img src="{{ current_user.profile_picture }}" alt="Profile" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                            {% else %}
+                                <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                                     style="width: 150px; height: 150px; background: rgba(255, 255, 255, 0.1); margin: 0 auto;">
+                                    <i class="fas fa-user fa-4x" style="color: var(--neon-purple);"></i>
+                                </div>
+                            {% endif %}
+                            <button class="btn btn-sm btn-neon position-absolute bottom-0 end-0" 
+                                    data-bs-toggle="modal" data-bs-target="#uploadPhotoModal">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <h3 class="card-title mb-3" style="color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);">
+                        {{ current_user.username }}
+                    </h3>
+                    <p class="text-muted mb-2">
+                        <i class="fas fa-envelope" style="color: var(--neon-blue);"></i> 
+                        {{ current_user.email }}
+                    </p>
+                    <p class="mb-3">
+                        <span class="badge" style="background-color: var(--neon-pink);">
+                            <i class="fas fa-user-tag"></i> 
+                            {{ current_user.role|title }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Profile & Settings -->
+        <div class="col-md-8">
+            <!-- Edit Profile Form -->
+            <div class="card loading-fade-in mb-4">
+                <div class="card-body">
+                    <h4 class="card-title mb-4" style="color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue);">
+                        <i class="fas fa-user-edit"></i> Επεξεργασία Προφίλ
+                    </h4>
+                    
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" action="{{ url_for('auth.update_profile') }}">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Όνομα Χρήστη</label>
+                            <input type="text" class="form-control" id="username" name="username" 
+                                   value="{{ current_user.username }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   value="{{ current_user.email }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="current_password" class="form-label">Τρέχων Κωδικός</label>
+                            <input type="password" class="form-control" id="current_password" name="current_password">
+                        </div>
+                        <div class="mb-3">
+                            <label for="new_password" class="form-label">Νέος Κωδικός (προαιρετικό)</label>
+                            <input type="password" class="form-control" id="new_password" name="new_password">
+                        </div>
+                        <button type="submit" class="btn btn-neon">
+                            <i class="fas fa-save"></i> Αποθήκευση Αλλαγών
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Settings -->
+            <div class="card loading-fade-in">
+                <div class="card-body">
+                    <h4 class="card-title mb-4" style="color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink);">
+                        <i class="fas fa-cog"></i> Ρυθμίσεις
+                    </h4>
+                    <div class="mb-3">
+                        <label class="form-label d-flex justify-content-between align-items-center">
+                            Ειδοποιήσεις Email
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label d-flex justify-content-between align-items-center">
+                            Προβολή Προόδου
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="showProgress" checked>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Photo Modal -->
+<div class="modal fade" id="uploadPhotoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ανέβασμα Φωτογραφίας</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('auth.upload_profile_picture') }}" method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="profile_picture" class="form-label">Επιλέξτε Φωτογραφία</label>
+                        <input type="file" class="form-control" id="profile_picture" name="profile_picture" accept="image/*" required>
+                    </div>
+                    <button type="submit" class="btn btn-neon">
+                        <i class="fas fa-upload"></i> Ανέβασμα
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.btn-neon:hover {
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+
+.form-control {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.form-control:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--neon-purple);
+    box-shadow: 0 0 10px var(--neon-purple);
+    color: #fff;
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+    .col-md-4 {
+        margin-bottom: 2rem;
+    }
+}
+</style>
+{% endblock %}
