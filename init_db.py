@@ -1,5 +1,6 @@
 from app import app, db
 from models import User, Course
+from werkzeug.security import generate_password_hash
 
 def init_db():
     with app.app_context():
@@ -9,9 +10,9 @@ def init_db():
             test_user = User(
                 username='test_user',
                 email='test@example.com',
-                role='student'
+                role='student',
+                password_hash=generate_password_hash('test123')
             )
-            test_user.set_password('test123')
             db.session.add(test_user)
             
         # Create test course
