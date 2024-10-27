@@ -1,0 +1,36 @@
+:root {
+    --neon-purple: #b026ff;
+    --neon-pink: #ff26b0;
+    --neon-blue: #26b0ff;
+}
+
+body {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #fff;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+}
+
+.btn-neon {
+    position: relative;
+    padding: 10px 30px;
+    color: var(--neon-purple);
+    border: 2px solid var(--neon-purple);
+    border-radius: 5px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    overflow: hidden;
+    transition: 0.5s;
+    z-index: 1;
+}
+
+.btn-neon:hover {
+    color: #fff;
+    background: var(--neon-purple);
+    box-shadow: 0 0 25px var(--neon-purple);
+}

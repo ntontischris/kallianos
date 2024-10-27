@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="el" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Εκπαιδευτική Πλατφόρμα</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="/static/css/main.css" rel="stylesheet">
+    <link href="/static/css/animations.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+</head>
+<body>
+    {% include 'components/header.html' %}
+    
+    <div class="container mt-4">
+        {% block content %}{% endblock %}
+    </div>
+    
+    {% include 'components/footer.html' %}
+    
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/animations.js"></script>
+</body>
+</html>
