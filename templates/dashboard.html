@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-4" style="color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);">
+                Καλώς ήρθες, {{ current_user.username }}!
+            </h1>
+        </div>
+    </div>
+
+    <!-- Enrolled Courses Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card loading-fade-in">
+                <div class="card-body">
+                    <h2 class="card-title mb-4" style="color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue);">
+                        <i class="fas fa-book"></i> Τα Μαθήματά μου
+                    </h2>
+                    <div class="row g-4">
+                        {% for enrollment in enrollments %}
+                        <div class="col-md-4">
+                            <div class="card h-100" style="background: rgba(255, 255, 255, 0.05);">
+                                <div class="card-body">
+                                    <h5 class="card-title" style="color: var(--neon-pink);">
+                                        {{ enrollment.course.title }}
+                                    </h5>
+                                    <p class="card-text text-muted">
+                                        {{ enrollment.course.description[:100] }}...
+                                    </p>
+                                    <div class="progress mb-3" style="height: 10px;">
+                                        <div class="progress-bar bg-success" role="progressbar" 
+                                             style="width: {{ enrollment.progress }}%">
+                                        </div>
+                                    </div>
+                                    <a href="{{ url_for('courses.view', id=enrollment.course.id) }}" 
+                                       class="btn btn-neon btn-sm">
+                                        Προβολή Μαθήματος
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="col-12">
+                            <p class="text-muted">Δεν έχετε εγγραφεί σε κάποιο μάθημα ακόμα.</p>
+                            <a href="{{ url_for('courses.index') }}" class="btn btn-neon">
+                                Εξερευνήστε τα Μαθήματα
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress & Grades Section -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card loading-fade-in">
+                <div class="card-body">
+                    <h2 class="card-title mb-4" style="color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);">
+                        <i class="fas fa-chart-line"></i> Πρόοδος
+                    </h2>
+                    <canvas id="progressChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card loading-fade-in">
+                <div class="card-body">
+                    <h2 class="card-title mb-4" style="color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink);">
+                        <i class="fas fa-star"></i> Βαθμοί
+                    </h2>
+                    {% for enrollment in enrollments %}
+                    <div class="mb-3">
+                        <h6 style="color: var(--neon-blue);">{{ enrollment.course.title }}</h6>
+                        {% for grade in enrollment.grades[-3:] %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>{{ grade.title }}</span>
+                            <span class="badge bg-success">
+                                {{ "%.1f"|format(grade.score/grade.max_score*100) }}%
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card loading-fade-in">
+                <div class="card-body">
+                    <h2 class="card-title mb-4" style="color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue);">
+                        <i class="fas fa-history"></i> Πρόσφατες Δραστηριότητες
+                    </h2>
+                    <div class="list-group">
+                        {% for activity in activities %}
+                        <div class="list-group-item" style="background: rgba(255, 255, 255, 0.05);">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1" style="color: var(--neon-pink);">{{ activity.description }}</h6>
+                                <small class="text-muted">
+                                    {{ activity.timestamp.strftime('%d/%m/%Y %H:%M') }}
+                                </small>
+                            </div>
+                        </div>
+                        {% else %}
+                        <p class="text-muted">Δεν υπάρχουν πρόσφατες δραστηριότητες.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js for Progress Visualization -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('progressChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|tojson }},
+            datasets: [{
+                label: 'Συνολική Πρόοδος',
+                data: {{ chart_data|tojson }},
+                borderColor: '#b026ff',
+                tension: 0.4,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#fff'
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#fff'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#fff'
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

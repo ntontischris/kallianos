@@ -10,10 +10,27 @@
     <!-- Course Title and Description -->
     <div class="card loading-fade-in mb-4">
         <div class="card-body">
-            <h1 class="card-title mb-3" style="color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);">
-                {{ course.title }}
-            </h1>
-            <p class="card-text text-muted">{{ course.description }}</p>
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="card-title mb-3" style="color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);">
+                        {{ course.title }}
+                    </h1>
+                    <p class="card-text text-muted">{{ course.description }}</p>
+                </div>
+                {% if current_user.is_authenticated and current_user.role == 'student' %}
+                    {% if not is_enrolled %}
+                    <form action="{{ url_for('courses.enroll', course_id=course.id) }}" method="POST">
+                        <button type="submit" class="btn btn-neon">
+                            <i class="fas fa-user-plus"></i> Εγγραφή στο Μάθημα
+                        </button>
+                    </form>
+                    {% else %}
+                    <span class="badge bg-success">
+                        <i class="fas fa-check"></i> Εγγεγραμμένος/η
+                    </span>
+                    {% endif %}
+                {% endif %}
+            </div>
         </div>
     </div>
 
@@ -40,7 +57,19 @@
             <h3 class="card-title mb-3" style="color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue);">
                 <i class="fas fa-book"></i> Εκπαιδευτικό Υλικό
             </h3>
-            <p class="text-muted">Το εκπαιδευτικό υλικό θα είναι σύντομα διαθέσιμο.</p>
+            {% if is_enrolled %}
+            <div class="list-group">
+                <!-- Sample materials, to be replaced with actual content -->
+                <a href="#" class="list-group-item list-group-item-action" style="background: rgba(255, 255, 255, 0.05);">
+                    <i class="fas fa-file-pdf"></i> Εισαγωγικές Σημειώσεις
+                </a>
+                <a href="#" class="list-group-item list-group-item-action" style="background: rgba(255, 255, 255, 0.05);">
+                    <i class="fas fa-file-powerpoint"></i> Διαφάνειες Μαθήματος 1
+                </a>
+            </div>
+            {% else %}
+            <p class="text-muted">Εγγραφείτε στο μάθημα για να αποκτήσετε πρόσβαση στο εκπαιδευτικό υλικό.</p>
+            {% endif %}
         </div>
     </div>
 
@@ -50,7 +79,33 @@
             <h3 class="card-title mb-3" style="color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);">
                 <i class="fas fa-calendar-alt"></i> Πρόγραμμα Μαθημάτων
             </h3>
-            <p class="text-muted">Το πρόγραμμα μαθημάτων θα ανακοινωθεί σύντομα.</p>
+            {% if is_enrolled %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Ημέρα</th>
+                            <th>Ώρα</th>
+                            <th>Αίθουσα</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Δευτέρα</td>
+                            <td>09:00 - 11:00</td>
+                            <td>Αίθουσα 101</td>
+                        </tr>
+                        <tr>
+                            <td>Τετάρτη</td>
+                            <td>11:00 - 13:00</td>
+                            <td>Αίθουσα 103</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">Εγγραφείτε στο μάθημα για να δείτε το πρόγραμμα.</p>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -67,6 +122,18 @@
 .card:hover {
     transform: translateY(-5px);
     box-shadow: 0 0 20px var(--neon-purple);
+}
+
+.table {
+    color: #fff;
+}
+
+.table thead th {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.table td, .table th {
+    border-top-color: rgba(255, 255, 255, 0.1);
 }
 
 @media (max-width: 768px) {
