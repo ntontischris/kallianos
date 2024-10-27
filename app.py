@@ -20,9 +20,11 @@ def create_app():
     
     from auth import auth_bp
     from courses import courses_bp
+    from teacher import teacher_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(courses_bp)
+    app.register_blueprint(teacher_bp)
     
     @app.route('/')
     def index():

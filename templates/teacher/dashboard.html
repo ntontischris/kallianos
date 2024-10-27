@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-4" style="color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);">
+                <i class="fas fa-chalkboard-teacher"></i> Καλώς ήρθατε, {{ current_user.username }}!
+            </h1>
+        </div>
+    </div>
+
+    <!-- Course Management Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card loading-fade-in">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="card-title" style="color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue);">
+                            <i class="fas fa-book"></i> Τα Μαθήματά μου
+                        </h2>
+                        <a href="{{ url_for('teacher.create_course') }}" class="btn btn-neon">
+                            <i class="fas fa-plus"></i> Νέο Μάθημα
+                        </a>
+                    </div>
+
+                    <div class="row g-4">
+                        {% for course in courses %}
+                        <div class="col-md-4">
+                            <div class="card h-100" style="background: rgba(255, 255, 255, 0.05);">
+                                <div class="card-body">
+                                    <h5 class="card-title" style="color: var(--neon-pink);">
+                                        {{ course.title }}
+                                    </h5>
+                                    <p class="card-text text-muted">
+                                        {{ course.description[:100] }}...
+                                    </p>
+                                    <div class="d-grid gap-2">
+                                        <a href="{{ url_for('teacher.view_course', course_id=course.id) }}" 
+                                           class="btn btn-neon btn-sm">
+                                            <i class="fas fa-eye"></i> Προβολή
+                                        </a>
+                                        <a href="{{ url_for('teacher.edit_course', course_id=course.id) }}" 
+                                           class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-edit"></i> Επεξεργασία
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="col-12">
+                            <p class="text-muted">Δεν έχετε δημιουργήσει κάποιο μάθημα ακόμα.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card loading-fade-in">
+                <div class="card-body">
+                    <h2 class="card-title mb-4" style="color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);">
+                        <i class="fas fa-history"></i> Πρόσφατες Δραστηριότητες
+                    </h2>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Μάθημα</th>
+                                    <th>Μαθητής</th>
+                                    <th>Ενέργεια</th>
+                                    <th>Ημερομηνία</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for course in courses %}
+                                {% for enrollment in course.enrollments %}
+                                <tr>
+                                    <td>{{ course.title }}</td>
+                                    <td>{{ enrollment.student.username }}</td>
+                                    <td>Εγγραφή στο μάθημα</td>
+                                    <td>{{ enrollment.enrollment_date.strftime('%d/%m/%Y') }}</td>
+                                </tr>
+                                {% endfor %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -10,6 +10,8 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
+        if current_user.role == 'teacher':
+            return redirect(url_for('teacher.dashboard'))
         return redirect(url_for('courses.index'))
         
     if request.method == 'POST':
@@ -27,10 +29,53 @@ def login():
             next_page = request.args.get('next')
             if next_page:
                 return redirect(next_page)
+            if user.role == 'teacher':
+                return redirect(url_for('teacher.dashboard'))
             return redirect(url_for('courses.index'))
             
         flash('Λάθος email ή κωδικός πρόσβασης.', 'error')
     return render_template('auth/login.html')
+
+@auth_bp.route('/register/teacher', methods=['GET', 'POST'])
+def register_teacher():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+        
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if not all([username, email, password, confirm_password]):
+            flash('Παρακαλώ συμπληρώστε όλα τα πεδία.', 'error')
+            return render_template('auth/register_teacher.html')
+            
+        if password != confirm_password:
+            flash('Οι κωδικοί δεν ταιριάζουν.', 'error')
+            return render_template('auth/register_teacher.html')
+            
+        if User.query.filter_by(email=email).first():
+            flash('Το email χρησιμοποιείται ήδη.', 'error')
+            return render_template('auth/register_teacher.html')
+            
+        if User.query.filter_by(username=username).first():
+            flash('Το όνομα χρήστη χρησιμοποιείται ήδη.', 'error')
+            return render_template('auth/register_teacher.html')
+            
+        user = User(username=username, email=email, role='teacher')
+        user.set_password(password)
+        
+        try:
+            db.session.add(user)
+            db.session.commit()
+            flash('Η εγγραφή ολοκληρώθηκε με επιτυχία! Μπορείτε να συνδεθείτε.', 'success')
+            return redirect(url_for('auth.login'))
+        except:
+            db.session.rollback()
+            flash('Παρουσιάστηκε σφάλμα κατά την εγγραφή.', 'error')
+            
+    return render_template('auth/register_teacher.html')
 
 @auth_bp.route('/logout')
 @login_required
@@ -52,17 +97,14 @@ def update_profile():
     current_password = request.form.get('current_password')
     new_password = request.form.get('new_password')
 
-    # Verify current password if trying to change password or email
     if (new_password or email != current_user.email) and not current_user.check_password(current_password):
         flash('Ο τρέχων κωδικός είναι λάθος.', 'error')
         return redirect(url_for('auth.profile'))
 
-    # Check if email already exists
     if email != current_user.email and User.query.filter_by(email=email).first():
         flash('Το email χρησιμοποιείται ήδη.', 'error')
         return redirect(url_for('auth.profile'))
 
-    # Update user information
     current_user.username = username
     current_user.email = email
     if new_password:
@@ -90,7 +132,6 @@ def upload_profile_picture():
         return redirect(url_for('auth.profile'))
 
     if file:
-        # Update the profile_picture field in the database
         try:
             filename = secure_filename(file.filename)
             file_path = os.path.join('static/uploads/profile_pictures', filename)
