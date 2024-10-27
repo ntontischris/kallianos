@@ -4,6 +4,15 @@ from werkzeug.security import generate_password_hash
 
 def init_db():
     with app.app_context():
+        # Create admin user
+        admin_user = User(
+            username='admin',
+            email='admin@edugreek.com',
+            role='admin',
+            password_hash=generate_password_hash('admin123')
+        )
+        db.session.add(admin_user)
+        
         # Create test parent
         test_parent = User(
             username='test_parent',
@@ -41,7 +50,7 @@ def init_db():
         test_course = Course(
             title='Αρχαία Ελληνικά',
             description='Εισαγωγή στη γλώσσα και τον πολιτισμό της αρχαίας Ελλάδας',
-            teacher_id=test_teacher.id  # Use the actual teacher ID
+            teacher_id=test_teacher.id
         )
         db.session.add(test_course)
         

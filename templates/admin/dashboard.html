@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-4" style="color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);">
+                <i class="fas fa-chart-line"></i> Πίνακας Ελέγχου Διαχειριστή
+            </h1>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card loading-fade-in">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: var(--neon-blue);">
+                        <i class="fas fa-users"></i> Σύνολο Χρηστών
+                    </h5>
+                    <h2 class="mb-0">{{ total_users }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card loading-fade-in">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: var(--neon-pink);">
+                        <i class="fas fa-book"></i> Σύνολο Μαθημάτων
+                    </h5>
+                    <h2 class="mb-0">{{ total_courses }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card loading-fade-in">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: var(--neon-purple);">
+                        <i class="fas fa-user-graduate"></i> Ενεργές Εγγραφές
+                    </h5>
+                    <h2 class="mb-0">{{ active_enrollments }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card loading-fade-in">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: var(--neon-blue);">
+                        <i class="fas fa-history"></i> Πρόσφατες Δραστηριότητες
+                    </h5>
+                    <h2 class="mb-0">{{ recent_activities }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <!-- User Activity Chart -->
+        <div class="col-md-8">
+            <div class="card loading-fade-in">
+                <div class="card-body">
+                    <h5 class="card-title mb-4" style="color: var(--neon-purple);">
+                        <i class="fas fa-chart-area"></i> Δραστηριότητα Χρηστών (30 ημέρες)
+                    </h5>
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <!-- User Distribution Chart -->
+        <div class="col-md-4">
+            <div class="card loading-fade-in">
+                <div class="card-body">
+                    <h5 class="card-title mb-4" style="color: var(--neon-pink);">
+                        <i class="fas fa-chart-pie"></i> Κατανομή Χρηστών
+                    </h5>
+                    <canvas id="userDistributionChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Performance Chart -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card loading-fade-in">
+                <div class="card-body">
+                    <h5 class="card-title mb-4" style="color: var(--neon-blue);">
+                        <i class="fas fa-chart-bar"></i> Μέση Επίδοση ανά Μάθημα
+                    </h5>
+                    <canvas id="coursePerformanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // User Activity Chart
+    new Chart(document.getElementById('activityChart').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: {{ activity_dates|tojson }},
+            datasets: [{
+                label: 'Ημερήσιες Δραστηριότητες',
+                data: {{ activity_counts|tojson }},
+                borderColor: '#b026ff',
+                tension: 0.4,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#fff'
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#fff'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#fff'
+                    }
+                }
+            }
+        }
+    });
+
+    // User Distribution Chart
+    new Chart(document.getElementById('userDistributionChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys({{ user_distribution|tojson }}),
+            datasets: [{
+                data: Object.values({{ user_distribution|tojson }}),
+                backgroundColor: ['#b026ff', '#ff26b0', '#26b0ff']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#fff'
+                    }
+                }
+            }
+        }
+    });
+
+    // Course Performance Chart
+    new Chart(document.getElementById('coursePerformanceChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: {{ course_names|tojson }},
+            datasets: [{
+                label: 'Μέση Βαθμολογία (%)',
+                data: {{ avg_grades|tojson }},
+                backgroundColor: '#26b0ff'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#fff'
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#fff'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#fff'
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

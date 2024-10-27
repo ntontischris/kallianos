@@ -32,6 +32,12 @@
                             <i class="fas fa-user-friends"></i> Πίνακας Γονέα
                         </a>
                     </li>
+                    {% elif current_user.role == 'admin' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin.dashboard') }}" style="color: var(--neon-pink); transition: all 0.3s;">
+                            <i class="fas fa-chart-line"></i> Πίνακας Διαχείρισης
+                        </a>
+                    </li>
                     {% endif %}
                 {% endif %}
                 <li class="nav-item">
@@ -100,7 +106,6 @@ async function updateUnreadCount() {
     }
 }
 
-// Update count on page load and every 30 seconds
 document.addEventListener('DOMContentLoaded', function() {
     updateUnreadCount();
     setInterval(updateUnreadCount, 30000);

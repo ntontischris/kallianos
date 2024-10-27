@@ -24,6 +24,7 @@ def create_app():
     from parent import parent_bp
     from messages import messages_bp
     from routes.ai import ai_bp
+    from admin import admin_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(courses_bp)
@@ -31,6 +32,7 @@ def create_app():
     app.register_blueprint(parent_bp)
     app.register_blueprint(messages_bp)
     app.register_blueprint(ai_bp)
+    app.register_blueprint(admin_bp)
     
     @app.route('/')
     def index():
