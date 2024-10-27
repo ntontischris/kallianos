@@ -36,6 +36,47 @@ def login():
         flash('Λάθος email ή κωδικός πρόσβασης.', 'error')
     return render_template('auth/login.html')
 
+@auth_bp.route('/register/student', methods=['GET', 'POST'])
+def register_student():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+        
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if not all([username, email, password, confirm_password]):
+            flash('Παρακαλώ συμπληρώστε όλα τα πεδία.', 'error')
+            return render_template('auth/register_student.html')
+            
+        if password != confirm_password:
+            flash('Οι κωδικοί δεν ταιριάζουν.', 'error')
+            return render_template('auth/register_student.html')
+            
+        if User.query.filter_by(email=email).first():
+            flash('Το email χρησιμοποιείται ήδη.', 'error')
+            return render_template('auth/register_student.html')
+            
+        if User.query.filter_by(username=username).first():
+            flash('Το όνομα χρήστη χρησιμοποιείται ήδη.', 'error')
+            return render_template('auth/register_student.html')
+            
+        user = User(username=username, email=email, role='student')
+        user.set_password(password)
+        
+        try:
+            db.session.add(user)
+            db.session.commit()
+            flash('Η εγγραφή ολοκληρώθηκε με επιτυχία! Μπορείτε να συνδεθείτε.', 'success')
+            return redirect(url_for('auth.login'))
+        except:
+            db.session.rollback()
+            flash('Παρουσιάστηκε σφάλμα κατά την εγγραφή.', 'error')
+            
+    return render_template('auth/register_student.html')
+
 @auth_bp.route('/register/teacher', methods=['GET', 'POST'])
 def register_teacher():
     if current_user.is_authenticated:
