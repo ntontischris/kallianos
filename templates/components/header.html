@@ -1,0 +1,43 @@
+<nav class="navbar navbar-expand-lg navbar-dark" style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(10px);">
+    <div class="container">
+        <a class="navbar-brand" href="/" style="color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);">
+            <i class="fas fa-graduation-cap"></i> EduGreek
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/" style="color: var(--neon-blue); transition: all 0.3s;">
+                        <i class="fas fa-home"></i> Αρχική
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/courses" style="color: var(--neon-pink); transition: all 0.3s;">
+                        <i class="fas fa-book"></i> Μαθήματα
+                    </a>
+                </li>
+            </ul>
+            <div class="navbar-nav">
+                {% if current_user.is_authenticated %}
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" 
+                           data-bs-toggle="dropdown" style="color: var(--neon-purple);">
+                            <i class="fas fa-user"></i> {{ current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/profile">Προφίλ</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Αποσύνδεση</a></li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <a class="nav-link btn btn-neon" href="{{ url_for('auth.login') }}" style="margin-left: 10px;">
+                        <i class="fas fa-sign-in-alt"></i> Σύνδεση
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
