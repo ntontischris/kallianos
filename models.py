@@ -11,8 +11,14 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), nullable=False)  # admin, teacher, student, parent
     profile_picture = db.Column(db.String(255))  # Path to profile picture
     
+    # Parent-Student relationship
+    parent_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    children = db.relationship('User', backref=db.backref('parent', remote_side=[id]), lazy=True)
+    
     # Relationships
     enrollments = db.relationship('Enrollment', backref='student', lazy=True)
+    messages_sent = db.relationship('Message', foreign_keys='Message.sender_id', backref='sender', lazy=True)
+    messages_received = db.relationship('Message', foreign_keys='Message.recipient_id', backref='recipient', lazy=True)
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -52,3 +58,12 @@ class Activity(db.Model):
     activity_type = db.Column(db.String(50), nullable=False)  # enrollment, grade, etc.
     description = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    subject = db.Column(db.String(100))
+    body = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    read = db.Column(db.Boolean, default=False)

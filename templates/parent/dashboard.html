@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-4" style="color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);">
+                <i class="fas fa-user-friends"></i> Καλώς ήρθατε, {{ current_user.username }}!
+            </h1>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card loading-fade-in">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="card-title" style="color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue);">
+                            <i class="fas fa-tasks"></i> Γρήγορες Ενέργειες
+                        </h2>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <a href="{{ url_for('parent.link_student') }}" class="btn btn-neon w-100">
+                                <i class="fas fa-link"></i> Σύνδεση με Μαθητή
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{{ url_for('parent.messages') }}" class="btn btn-neon w-100">
+                                <i class="fas fa-envelope"></i> Μηνύματα
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="#" class="btn btn-neon w-100">
+                                <i class="fas fa-calendar-alt"></i> Ημερολόγιο
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Students Progress Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card loading-fade-in">
+                <div class="card-body">
+                    <h2 class="card-title mb-4" style="color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink);">
+                        <i class="fas fa-graduation-cap"></i> Οι Μαθητές μου
+                    </h2>
+                    
+                    {% if children %}
+                    <div class="row g-4">
+                        {% for student in children %}
+                        <div class="col-md-6">
+                            <div class="card h-100" style="background: rgba(255, 255, 255, 0.05);">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3" style="color: var(--neon-purple);">
+                                        {{ student.username }}
+                                    </h5>
+                                    <div class="mb-3">
+                                        <p class="text-muted mb-2">Πρόοδος Μαθημάτων</p>
+                                        {% for enrollment in student.enrollments %}
+                                        <div class="mb-2">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small>{{ enrollment.course.title }}</small>
+                                                <small class="text-muted">
+                                                    {% set grade_avg = enrollment.grades|map(attribute='score')|list|avg %}
+                                                    {{ "%.1f"|format(grade_avg) if grade_avg else 'Χωρίς βαθμό' }}
+                                                </small>
+                                            </div>
+                                            <div class="progress" style="height: 5px;">
+                                                <div class="progress-bar bg-success" role="progressbar" 
+                                                     style="width: {{ grade_avg if grade_avg else 0 }}%">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="d-grid">
+                                        <a href="{{ url_for('parent.student_progress', student_id=student.id) }}" 
+                                           class="btn btn-neon btn-sm">
+                                            <i class="fas fa-chart-line"></i> Αναλυτική Πρόοδος
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center">
+                        <p class="text-muted">Δεν έχετε συνδέσει κανέναν μαθητή ακόμα.</p>
+                        <a href="{{ url_for('parent.link_student') }}" class="btn btn-neon">
+                            <i class="fas fa-link"></i> Σύνδεση με Μαθητή
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Messages -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card loading-fade-in">
+                <div class="card-body">
+                    <h2 class="card-title mb-4" style="color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue);">
+                        <i class="fas fa-envelope"></i> Πρόσφατα Μηνύματα
+                    </h2>
+                    <div class="list-group">
+                        {% for message in current_user.messages_received[:5] %}
+                        <div class="list-group-item" style="background: rgba(255, 255, 255, 0.05);">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1" style="color: var(--neon-pink);">{{ message.subject }}</h6>
+                                <small class="text-muted">{{ message.timestamp.strftime('%d/%m/%Y') }}</small>
+                            </div>
+                            <p class="mb-1">{{ message.body[:100] }}...</p>
+                            <small>Από: {{ message.sender.username }}</small>
+                        </div>
+                        {% else %}
+                        <p class="text-muted">Δεν έχετε νέα μηνύματα.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from models import User, db
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -12,6 +12,8 @@ def login():
     if current_user.is_authenticated:
         if current_user.role == 'teacher':
             return redirect(url_for('teacher.dashboard'))
+        elif current_user.role == 'parent':
+            return redirect(url_for('parent.dashboard'))
         return redirect(url_for('courses.index'))
         
     if request.method == 'POST':
@@ -31,6 +33,8 @@ def login():
                 return redirect(next_page)
             if user.role == 'teacher':
                 return redirect(url_for('teacher.dashboard'))
+            elif user.role == 'parent':
+                return redirect(url_for('parent.dashboard'))
             return redirect(url_for('courses.index'))
             
         flash('Λάθος email ή κωδικός πρόσβασης.', 'error')
@@ -117,6 +121,47 @@ def register_teacher():
             flash('Παρουσιάστηκε σφάλμα κατά την εγγραφή.', 'error')
             
     return render_template('auth/register_teacher.html')
+
+@auth_bp.route('/register/parent', methods=['GET', 'POST'])
+def register_parent():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+        
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if not all([username, email, password, confirm_password]):
+            flash('Παρακαλώ συμπληρώστε όλα τα πεδία.', 'error')
+            return render_template('auth/register_parent.html')
+            
+        if password != confirm_password:
+            flash('Οι κωδικοί δεν ταιριάζουν.', 'error')
+            return render_template('auth/register_parent.html')
+            
+        if User.query.filter_by(email=email).first():
+            flash('Το email χρησιμοποιείται ήδη.', 'error')
+            return render_template('auth/register_parent.html')
+            
+        if User.query.filter_by(username=username).first():
+            flash('Το όνομα χρήστη χρησιμοποιείται ήδη.', 'error')
+            return render_template('auth/register_parent.html')
+            
+        user = User(username=username, email=email, role='parent')
+        user.set_password(password)
+        
+        try:
+            db.session.add(user)
+            db.session.commit()
+            flash('Η εγγραφή ολοκληρώθηκε με επιτυχία! Μπορείτε να συνδεθείτε.', 'success')
+            return redirect(url_for('auth.login'))
+        except:
+            db.session.rollback()
+            flash('Παρουσιάστηκε σφάλμα κατά την εγγραφή.', 'error')
+            
+    return render_template('auth/register_parent.html')
 
 @auth_bp.route('/logout')
 @login_required
