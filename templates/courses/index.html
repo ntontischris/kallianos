@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-center" style="color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);">
+        <i class="fas fa-book"></i> Μαθήματα
+    </h1>
+    
+    <div class="row g-4">
+        {% for course in courses %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 loading-fade-in" style="transition: all 0.3s ease;">
+                <div class="card-body">
+                    <h5 class="card-title mb-3" style="color: var(--neon-blue); text-shadow: 0 0 5px var(--neon-blue);">
+                        {{ course.title }}
+                    </h5>
+                    <p class="card-text text-muted mb-3">{{ course.description }}</p>
+                    {% if course.teacher_id in teachers %}
+                    <p class="card-text">
+                        <small style="color: var(--neon-pink);">
+                            <i class="fas fa-chalkboard-teacher"></i> 
+                            {{ teachers[course.teacher_id] }}
+                        </small>
+                    </p>
+                    {% endif %}
+                    <a href="{{ url_for('courses.view', id=course.id) }}" 
+                       class="btn btn-neon mt-2 w-100">
+                        Περισσότερα
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center">
+            <p class="text-muted">Δεν υπάρχουν διαθέσιμα μαθήματα.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px var(--neon-purple);
+}
+</style>
+{% endblock %}
