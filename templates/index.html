@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="text-center">
+        <h1 class="display-4 mb-4" style="color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);">
+            Καλώς ήρθατε στο EduGreek
+        </h1>
+        <p class="lead mb-4">
+            Η σύγχρονη εκπαιδευτική πλατφόρμα για το μέλλον της μάθησης
+        </p>
+    </div>
+
+    <div class="row g-4 mt-4">
+        <div class="col-md-4">
+            <div class="card loading-fade-in h-100">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: var(--neon-blue);">
+                        <i class="fas fa-graduation-cap"></i> Σύγχρονη Εκπαίδευση
+                    </h5>
+                    <p class="card-text text-muted">
+                        Προηγμένα εργαλεία μάθησης και διαδραστικό περιεχόμενο
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card loading-fade-in h-100">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: var(--neon-pink);">
+                        <i class="fas fa-users"></i> Προσωπική Καθοδήγηση
+                    </h5>
+                    <p class="card-text text-muted">
+                        Εξατομικευμένη υποστήριξη από έμπειρους καθηγητές
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card loading-fade-in h-100">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: var(--neon-purple);">
+                        <i class="fas fa-chart-line"></i> Συνεχής Πρόοδος
+                    </h5>
+                    <p class="card-text text-muted">
+                        Παρακολούθηση προόδου και στατιστικά σε πραγματικό χρόνο
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-5">
+        <a href="{{ url_for('courses.index') }}" class="btn btn-neon">
+            <i class="fas fa-book"></i> Δείτε τα Μαθήματά μας
+        </a>
+    </div>
+</div>
+{% endblock %}

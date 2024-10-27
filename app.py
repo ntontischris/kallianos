@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from sqlalchemy.orm import DeclarativeBase
@@ -23,6 +23,10 @@ def create_app():
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(courses_bp)
+    
+    @app.route('/')
+    def index():
+        return render_template('index.html')
     
     with app.app_context():
         import models
