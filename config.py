@@ -1,10 +1,4 @@
-import os
-
 class Config:
-    SECRET_KEY = os.environ.get("FLASK_SECRET_KEY", "default_secret_key")
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
+    SECRET_KEY = 'your_secret_key'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://username:password@host:port/database'  # Replace with your Supabase connection details
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        "pool_recycle": 300,
-        "pool_pre_ping": True,
-    }

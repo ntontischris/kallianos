@@ -19,6 +19,7 @@ class User(UserMixin, db.Model):
     enrollments = db.relationship('Enrollment', backref='student', lazy=True)
     messages_sent = db.relationship('Message', foreign_keys='Message.sender_id', backref='sender', lazy=True)
     messages_received = db.relationship('Message', foreign_keys='Message.recipient_id', backref='recipient', lazy=True)
+    module_progress = db.relationship('ModuleProgress', backref='student', lazy=True)
     
     def set_password(self, password):
         from werkzeug.security import generate_password_hash
@@ -37,6 +38,42 @@ class Course(db.Model):
     
     # Relationships
     enrollments = db.relationship('Enrollment', backref='course', lazy=True)
+    modules = db.relationship('LearningModule', backref='course', lazy=True)
+
+class LearningModule(db.Model):
+    __tablename__ = 'learning_modules'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    content = db.Column(db.Text, nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
+    order = db.Column(db.Integer, nullable=False)  # For module sequence
+    module_type = db.Column(db.String(50), nullable=False)  # 'text', 'quiz', 'interactive'
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    progress = db.relationship('ModuleProgress', backref='module', lazy=True)
+    questions = db.relationship('ModuleQuestion', backref='module', lazy=True)
+
+class ModuleQuestion(db.Model):
+    __tablename__ = 'module_questions'
+    id = db.Column(db.Integer, primary_key=True)
+    module_id = db.Column(db.Integer, db.ForeignKey('learning_modules.id'), nullable=False)
+    question_text = db.Column(db.Text, nullable=False)
+    correct_answer = db.Column(db.Text, nullable=False)
+    options = db.Column(db.JSON)  # Store multiple choice options
+    question_type = db.Column(db.String(50), nullable=False)  # 'multiple_choice', 'text'
+    points = db.Column(db.Integer, default=1)
+
+class ModuleProgress(db.Model):
+    __tablename__ = 'module_progress'
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    module_id = db.Column(db.Integer, db.ForeignKey('learning_modules.id'), nullable=False)
+    completed = db.Column(db.Boolean, default=False)
+    score = db.Column(db.Float)  # For quiz/assessment modules
+    last_interaction = db.Column(db.DateTime, default=datetime.utcnow)
+    attempts = db.Column(db.Integer, default=0)
 
 class Enrollment(db.Model):
     __tablename__ = 'enrollments'

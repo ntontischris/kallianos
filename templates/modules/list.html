@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('courses.index') }}">Μαθήματα</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('courses.view', id=course.id) }}">{{ course.title }}</a></li>
+                    <li class="breadcrumb-item active">Ενότητες</li>
+                </ol>
+            </nav>
+            <h1 class="display-4" style="color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);">
+                {{ course.title }} - Ενότητες
+            </h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card loading-fade-in">
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for module in modules %}
+                        <div class="list-group-item mb-3" style="background: rgba(255, 255, 255, 0.05); border-radius: 15px;">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1" style="color: var(--neon-blue);">
+                                        {% if module.module_type == 'quiz' %}
+                                            <i class="fas fa-question-circle"></i>
+                                        {% elif module.module_type == 'interactive' %}
+                                            <i class="fas fa-laptop-code"></i>
+                                        {% else %}
+                                            <i class="fas fa-book"></i>
+                                        {% endif %}
+                                        {{ module.title }}
+                                    </h5>
+                                    <p class="mb-1 text-muted">{{ module.description }}</p>
+                                </div>
+                                <div class="text-end">
+                                    {% if current_user.role == 'student' and module.id in progress_data %}
+                                        {% if progress_data[module.id].completed %}
+                                            <span class="badge bg-success mb-2 d-block">
+                                                <i class="fas fa-check"></i> Ολοκληρώθηκε
+                                            </span>
+                                            {% if progress_data[module.id].score is not none %}
+                                            <small class="text-muted d-block">
+                                                Βαθμολογία: {{ "%.1f"|format(progress_data[module.id].score) }}%
+                                            </small>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge bg-warning mb-2 d-block">Σε εξέλιξη</span>
+                                        {% endif %}
+                                    {% endif %}
+                                    <a href="{{ url_for('modules.view_module', module_id=module.id) }}" 
+                                       class="btn btn-neon btn-sm">
+                                        <i class="fas fa-arrow-right"></i> Προβολή
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="text-center text-muted">
+                            <p>Δεν υπάρχουν διαθέσιμες ενότητες.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

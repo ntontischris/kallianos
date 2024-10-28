@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
-from models import Course, User, Enrollment, Grade, Activity, db
+from models import Course, User, Enrollment, Grade, Activity, LearningModule, db
 from flask_login import login_required, current_user
 from datetime import datetime, timedelta
 
@@ -25,10 +25,14 @@ def view(id):
             student_id=current_user.id,
             course_id=course.id
         ).first() is not None
+    
+    # Get ordered modules
+    modules = LearningModule.query.filter_by(course_id=id).order_by(LearningModule.order).all()
     return render_template('courses/view.html', 
                          course=course, 
                          teacher=teacher,
-                         is_enrolled=is_enrolled)
+                         is_enrolled=is_enrolled,
+                         modules=modules)
 
 @courses_bp.route('/courses/<int:course_id>/enroll', methods=['POST'])
 @login_required

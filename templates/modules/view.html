@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('courses.index') }}">Μαθήματα</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('courses.view', id=module.course.id) }}">{{ module.course.title }}</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('modules.list_modules', course_id=module.course.id) }}">Ενότητες</a></li>
+                    <li class="breadcrumb-item active">{{ module.title }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card loading-fade-in mb-4">
+                <div class="card-body">
+                    <h1 class="card-title mb-4" style="color: var(--neon-purple); text-shadow: 0 0 10px var(--neon-purple);">
+                        {{ module.title }}
+                    </h1>
+                    
+                    {% if module.module_type == 'quiz' %}
+                        <div id="quiz-content">
+                            <form id="quiz-form">
+                                {% for question in module.questions %}
+                                <div class="mb-4">
+                                    <h5 style="color: var(--neon-blue);">{{ question.question_text }}</h5>
+                                    {% if question.question_type == 'multiple_choice' %}
+                                        {% for option in question.options %}
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" 
+                                                   name="question_{{ question.id }}" 
+                                                   value="{{ option }}"
+                                                   id="q{{ question.id }}_{{ loop.index }}">
+                                            <label class="form-check-label" for="q{{ question.id }}_{{ loop.index }}">
+                                                {{ option }}
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <input type="text" class="form-control" 
+                                               name="question_{{ question.id }}" 
+                                               placeholder="Η απάντησή σας">
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                                <button type="submit" class="btn btn-neon" id="submit-quiz">
+                                    <i class="fas fa-check"></i> Υποβολή
+                                </button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <div class="module-content">
+                            {{ module.content|safe }}
+                        </div>
+                        {% if current_user.role == 'student' %}
+                        <button id="complete-module" class="btn btn-neon mt-4">
+                            <i class="fas fa-check"></i> Ολοκλήρωση Ενότητας
+                        </button>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card loading-fade-in">
+                <div class="card-body">
+                    <h5 class="card-title mb-3" style="color: var(--neon-pink);">
+                        <i class="fas fa-info-circle"></i> Πληροφορίες
+                    </h5>
+                    <p class="text-muted mb-3">{{ module.description }}</p>
+                    
+                    {% if current_user.role == 'student' and progress %}
+                    <div class="progress mb-3" style="height: 10px;">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ '100' if progress.completed else '0' }}%">
+                        </div>
+                    </div>
+                    <p class="mb-2">
+                        <small class="text-muted">Κατάσταση:</small>
+                        {% if progress.completed %}
+                            <span class="badge bg-success">Ολοκληρώθηκε</span>
+                        {% else %}
+                            <span class="badge bg-warning">Σε εξέλιξη</span>
+                        {% endif %}
+                    </p>
+                    {% if progress.score is not none %}
+                    <p class="mb-2">
+                        <small class="text-muted">Βαθμολογία:</small>
+                        <span class="badge bg-info">{{ "%.1f"|format(progress.score) }}%</span>
+                    </p>
+                    {% endif %}
+                    <p class="mb-0">
+                        <small class="text-muted">Προσπάθειες:</small>
+                        <span class="badge bg-secondary">{{ progress.attempts }}</span>
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const completeButton = document.getElementById('complete-module');
+    const quizForm = document.getElementById('quiz-form');
+    
+    if (completeButton) {
+        completeButton.addEventListener('click', async function() {
+            try {
+                const response = await fetch(`/module/{{ module.id }}/complete`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Error completing module');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error completing module');
+            }
+        });
+    }
+    
+    if (quizForm) {
+        quizForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const answers = {};
+            const formData = new FormData(quizForm);
+            
+            for (const [name, value] of formData.entries()) {
+                const questionId = name.replace('question_', '');
+                answers[questionId] = value;
+            }
+            
+            try {
+                const response = await fetch(`/module/{{ module.id }}/submit-quiz`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ answers })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert(`Quiz completed! Your score: ${data.score.toFixed(1)}%`);
+                    window.location.reload();
+                } else {
+                    alert(data.error || 'Error submitting quiz');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error submitting quiz');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

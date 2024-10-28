@@ -51,24 +51,50 @@
     </div>
     {% endif %}
 
-    <!-- Course Materials Section -->
+    <!-- Learning Modules Section -->
     <div class="card loading-fade-in mb-4">
         <div class="card-body">
-            <h3 class="card-title mb-3" style="color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue);">
-                <i class="fas fa-book"></i> Εκπαιδευτικό Υλικό
-            </h3>
-            {% if is_enrolled %}
-            <div class="list-group">
-                <!-- Sample materials, to be replaced with actual content -->
-                <a href="#" class="list-group-item list-group-item-action" style="background: rgba(255, 255, 255, 0.05);">
-                    <i class="fas fa-file-pdf"></i> Εισαγωγικές Σημειώσεις
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="card-title" style="color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue);">
+                    <i class="fas fa-book"></i> Εκπαιδευτικές Ενότητες
+                </h3>
+                {% if is_enrolled %}
+                <a href="{{ url_for('modules.list_modules', course_id=course.id) }}" class="btn btn-neon">
+                    <i class="fas fa-list"></i> Όλες οι Ενότητες
                 </a>
-                <a href="#" class="list-group-item list-group-item-action" style="background: rgba(255, 255, 255, 0.05);">
-                    <i class="fas fa-file-powerpoint"></i> Διαφάνειες Μαθήματος 1
-                </a>
+                {% endif %}
             </div>
+            {% if is_enrolled %}
+                {% if course.modules %}
+                <div class="list-group">
+                    {% for module in course.modules %}
+                    <div class="list-group-item" style="background: rgba(255, 255, 255, 0.05); margin-bottom: 10px; border-radius: 10px;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1" style="color: var(--neon-pink);">
+                                    {% if module.module_type == 'quiz' %}
+                                        <i class="fas fa-question-circle"></i>
+                                    {% elif module.module_type == 'interactive' %}
+                                        <i class="fas fa-laptop-code"></i>
+                                    {% else %}
+                                        <i class="fas fa-book-reader"></i>
+                                    {% endif %}
+                                    {{ module.title }}
+                                </h5>
+                                <p class="mb-1 text-muted">{{ module.description }}</p>
+                            </div>
+                            <a href="{{ url_for('modules.view_module', module_id=module.id) }}" class="btn btn-neon btn-sm">
+                                <i class="fas fa-arrow-right"></i> Προβολή
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">Δεν υπάρχουν διαθέσιμες ενότητες για αυτό το μάθημα.</p>
+                {% endif %}
             {% else %}
-            <p class="text-muted">Εγγραφείτε στο μάθημα για να αποκτήσετε πρόσβαση στο εκπαιδευτικό υλικό.</p>
+            <p class="text-muted">Εγγραφείτε στο μάθημα για να αποκτήσετε πρόσβαση στις εκπαιδευτικές ενότητες.</p>
             {% endif %}
         </div>
     </div>
